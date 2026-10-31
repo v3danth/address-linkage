@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Neighbour Report</title>
+<style>
+:root{--bg:#f7f7f5;--panel:#fff;--fg:#1d1d1b;--muted:#6b6b66;--line:#e3e2dd;--accent:#2f5d8a;--high:#e7f2ea;--high-fg:#1f5c32;
+--med:#fdf4dc;--med-fg:#7a5a00;--low:#f1f1ee;--low-fg:#55554f;--dup:#fbe9ee;--dup-fg:#8a2343;--ok:#2e7d32;--bad:#c62828;--chip:#eef2f7}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141518;--panel:#1c1d21;--fg:#e9e8e4;--muted:#9a998f;--line:#2e2f34;
+--accent:#8db4dd;--high:#173222;--high-fg:#9fd9b0;--med:#3a2f12;--med-fg:#f0cf7a;--low:#24252a;--low-fg:#b9b8b0;--dup:#3a1b26;--dup-fg:#f2a9c0;
+--ok:#66bb6a;--bad:#ef5350;--chip:#252a33}}
+:root[data-theme="dark"]{--bg:#141518;--panel:#1c1d21;--fg:#e9e8e4;--muted:#9a998f;--line:#2e2f34;--accent:#8db4dd;--high:#173222;--high-fg:#9fd9b0;
+--med:#3a2f12;--med-fg:#f0cf7a;--low:#24252a;--low-fg:#b9b8b0;--dup:#3a1b26;--dup-fg:#f2a9c0;--ok:#66bb6a;--bad:#ef5350;--chip:#252a33}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
+header{padding:20px 16px 0;max-width:1200px;margin:0 auto}h1{font-size:20px;margin:0 0 4px}
+.sub{color:var(--muted);font-size:13px}.warn{color:var(--muted);font-size:12px;margin-top:6px}
+nav{display:flex;gap:4px;max-width:1200px;margin:14px auto 0;padding:0 16px;border-bottom:1px solid var(--line);overflow-x:auto}
+nav button{background:none;border:0;border-bottom:2px solid transparent;padding:10px 12px;color:var(--muted);font:inherit;cursor:pointer;white-space:nowrap}
+nav button[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--accent);font-weight:600}
+main{max-width:1200px;margin:0 auto;padding:16px}section{display:none}section.on{display:block}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px}
+.card .k{color:var(--muted);font-size:12px}.card .v{font-size:24px;font-weight:600;margin-top:2px;font-variant-numeric:tabular-nums}
+.card .ci{color:var(--muted);font-size:12px}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 0 12px}
+input[type=search],select{padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--fg);font:inherit;min-width:0}
+input[type=search]{flex:1 1 260px}
+button.b{padding:7px 12px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--fg);font:inherit;cursor:pointer}
+.list{display:flex;flex-direction:column;gap:10px}
+.item{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.who{font-weight:600}.id{font-family:ui-monospace,Menlo,monospace;font-size:12.5px;color:var(--accent)}
+.addr{color:var(--muted);font-size:13px;overflow-wrap:anywhere}
+.row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:12px;align-items:start}
+.nb{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 10px;margin-top:8px;padding-top:8px;border-top:1px dashed var(--line)}
+.chip{display:inline-block;padding:1px 8px;border-radius:999px;font-size:12px;background:var(--chip);color:var(--fg);white-space:nowrap}
+.t-high{background:var(--high);color:var(--high-fg)}.t-medium{background:var(--med);color:var(--med-fg)}.t-low{background:var(--low);color:var(--low-fg)}
+.t-dup{background:var(--dup);color:var(--dup-fg)}
+.ev{font-size:12.5px;color:var(--muted)}.score{font-variant-numeric:tabular-nums;font-weight:600}
+.mark button{border:1px solid var(--line);background:transparent;color:var(--fg);border-radius:6px;padding:3px 9px;cursor:pointer;margin-left:4px}
+.item[data-mark=right] .mark button[data-v=right]{background:var(--ok);color:#fff;border-color:var(--ok)}
+.item[data-mark=wrong] .mark button[data-v=wrong]{background:var(--bad);color:#fff;border-color:var(--bad)}
+.more{text-align:center;margin:14px 0}.empty{color:var(--muted);padding:24px;text-align:center}
+table.m{border-collapse:collapse;width:100%;background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+table.m td,table.m th{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;font-variant-numeric:tabular-nums}
+h2{font-size:15px;margin:20px 0 8px}p.note{color:var(--muted);font-size:13px;max-width:820px}
+@media (max-width:700px){.row{grid-template-columns:1fr}}
+</style></head><body>
+<header><h1>Neighbour report</h1><div class="sub" id="sub"></div>
+<div class="warn">Local file containing names and home addresses. Do not share or upload.</div></header>
+<nav role="tablist">
+<button role="tab" data-t="overview" aria-selected="true">Overview</button>
+<button role="tab" data-t="people">People</button>
+<button role="tab" data-t="pairs">Pairs &amp; review</button>
+<button role="tab" data-t="households">Households</button>
+<button role="tab" data-t="dups">Duplicate records</button></nav>
+<main>
+<section id="overview" class="on"></section>
+<section id="people"><div class="bar"><input type="search" id="pq" placeholder="Admission / employee no, name, pincode…"></div><div class="list" id="plist"></div><div class="more"><button class="b" id="pmore">Show more</button></div></section>
+<section id="pairs"><div class="bar"><input type="search" id="q" placeholder="Filter: id, name, pincode, landmark…">
+<select id="ft"><option value="">All levels</option><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option></select>
+<select id="fr"><option value="">All relations</option></select>
+<select id="ff"><option value="">Family: any</option><option value="yes">Family: yes</option><option value="no">Family: no</option><option value="unknown">Family: unknown</option></select>
+<span class="sub" id="cnt"></span><button class="b" id="dl">Download marks (CSV)</button></div><div class="list" id="list"></div><div class="more"><button class="b" id="more">Show more</button></div></section>
+<section id="households"><p class="note" id="hnote"></p><div class="list" id="hlist"></div></section>
+<section id="dups"><p class="note">Pairs whose names and dates of birth match: one person with two records, usually from two admissions (e.g. M.Tech then PhD).</p><div class="list" id="dlist"></div><div class="more"><button class="b" id="dmore">Show more</button></div></section>
+</main>
+<script id="data" type="application/json">__DATA__</script>
+<script>
+const D=JSON.parse(document.getElementById('data').textContent);const P=D.people;
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const isDup=r=>r.rel.startsWith('same person');
+const tierChip=r=>isDup(r)?`<span class="chip t-dup">${esc(r.rel)}</span>`:`<span class="chip t-${r.tier}">${r.tier}</span> <span class="chip">${esc(r.rel)}</span>`;
+const person=i=>`<div><div class="who">${esc(P[i]?.n||'(no name)')} <span class="id">${esc(i)}</span></div><div class="addr">${esc(P[i]?.ad||'')}</div></div>`;
+document.getElementById('sub').textContent=`${D.label} · ${D.pairs.length.toLocaleString()} pairs · ${Object.keys(P).length.toLocaleString()} people`;
+// tabs
+for(const b of document.querySelectorAll('nav button'))b.onclick=()=>{for(const x of document.querySelectorAll('nav button'))x.setAttribute('aria-selected',x===b);
+ for(const s of document.querySelectorAll('section'))s.classList.toggle('on',s.id===b.dataset.t);try{localStorage.setItem('nr-tab',b.dataset.t)}catch(e){}};
+try{const t=localStorage.getItem('nr-tab');if(t)document.querySelector(`nav button[data-t="${t}"]`)?.click()}catch(e){}
+// overview
+(function(){const m=D.metrics||{};const c=(k,v,ci)=>`<div class="card"><div class="k">${k}</div><div class="v">${v}</div><div class="ci">${ci||''}</div></div>`;
+ const pct=x=>x==null?'–':(100*x).toFixed(1)+'%';const ci=x=>x?`95% CI ${pct(x[1])} – ${pct(x[2])}`:'';
+ const n=r=>D.pairs.filter(r).length.toLocaleString();
+ let h='<div class="cards">'+c('Siblings found (score ≥ 0.5)',pct(m.recall?.[0]),ci(m.recall))+c('Sibling ranked #1 neighbour',pct(m.hit1?.[0]),ci(m.hit1))
+ +c('Sibling in top 3',pct(m.hit3?.[0]),ci(m.hit3))+c('Held-out pincodes: ranked #1',pct(m.hit1_heldout?.[0]),ci(m.hit1_heldout))+'</div>';
+ h+='<h2>What the output contains</h2><table class="m"><tr><th>Level</th><th>Pairs</th><th>Meaning</th></tr>'
+ +`<tr><td><span class="chip t-high">high</span></td><td>${n(r=>!isDup(r)&&r.tier==='high')}</td><td>Identical address, same house number on the same street, one address containing the other, or model score ≥ 0.8</td></tr>`
+ +`<tr><td><span class="chip t-medium">medium</span></td><td>${n(r=>!isDup(r)&&r.tier==='medium')}</td><td>Model score 0.5 – 0.8</td></tr>`
+ +`<tr><td><span class="chip t-low">low</span></td><td>${n(r=>!isDup(r)&&r.tier==='low')}</td><td>Model score 0.3 – 0.5: same area, check before relying on it</td></tr>`
+ +`<tr><td><span class="chip t-dup">duplicates</span></td><td>${n(isDup)}</td><td>Same person with two records (not neighbours)</td></tr></table>`;
+ h+='<h2>How this was measured</h2><p class="note">The model reads permanent addresses only, never names. Its output is evaluated against siblings in the same pincode (both parents\' names match, different date of birth), who should share an address. Intervals come from resampling pincodes. "Held-out" pincodes were never used in training. Family information appears in this report only as the evaluation column "family".</p>';
+ document.getElementById('overview').innerHTML=h})();
+// people view
+const byP={};for(const r of D.pairs){if(isDup(r))continue;(byP[r.a]??=[]).push([r.b,r,r.ra]);(byP[r.b]??=[]).push([r.a,r,r.rb])}
+for(const k in byP)byP[k].sort((x,y)=>y[1].s-x[1].s);
+const pids=Object.keys(byP).sort((a,b)=>byP[b][0][1].s-byP[a][0][1].s);let pShown=40;
+function renderPeople(){const q=document.getElementById('pq').value.trim().toLowerCase();
+ const hits=q?pids.filter(i=>i.toLowerCase().includes(q)||(P[i]?.n||'').toLowerCase().includes(q)||(P[i]?.pin||'').includes(q)):pids;
+ document.getElementById('plist').innerHTML=hits.slice(0,pShown).map(i=>`<div class="item">${person(i)}<div class="sub">pincode ${esc(P[i]?.pin)}</div><div class="nb">`
+ +byP[i].slice(0,5).map(([o,r],k)=>`<div class="score">#${k+1}</div><div>${tierChip(r)} <span class="score">${r.s.toFixed(2)}</span> · <span class="who">${esc(P[o]?.n||'')}</span> <span class="id">${esc(o)}</span>`
+ +`<div class="addr">${esc(P[o]?.ad||'')}</div><div class="ev">${esc(r.ev)}${r.fam!=='unknown'?' · family: '+r.fam:''}</div></div>`).join('')+'</div></div>').join('')||'<div class="empty">No matches</div>';
+ document.getElementById('pmore').style.display=hits.length>pShown?'':'none'}
+document.getElementById('pq').oninput=()=>{pShown=40;renderPeople()};document.getElementById('pmore').onclick=()=>{pShown+=40;renderPeople()};renderPeople();
+// pairs view with marks
+const KEY='neighbour-report-marks';let marks={};try{marks=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){}
+const rels=[...new Set(D.pairs.map(r=>r.rel))].sort();document.getElementById('fr').innerHTML+=rels.map(r=>`<option>${esc(r)}</option>`).join('');
+let shown=60;
+function filtered(){const q=document.getElementById('q').value.trim().toLowerCase(),t=document.getElementById('ft').value,rl=document.getElementById('fr').value,f=document.getElementById('ff').value;
+ return D.pairs.filter(r=>(!t||r.tier===t&&!isDup(r))&&(!rl||r.rel===rl)&&(!f||r.fam===f)&&(!q||[r.a,r.b,r.pin,r.ev,P[r.a]?.n,P[r.b]?.n].join(' ').toLowerCase().includes(q)))}
+function renderPairs(){const rows=filtered().sort((x,y)=>y.s-x.s);document.getElementById('cnt').textContent=`${rows.length.toLocaleString()} pairs · ${Object.keys(marks).length} marked`;
+ document.getElementById('list').innerHTML=rows.slice(0,shown).map(r=>{const k=r.a+'|'+r.b;return `<div class="item" data-k="${esc(k)}" ${marks[k]?`data-mark="${marks[k]}"`:''}>`
+ +`<div class="row">${person(r.a)}${person(r.b)}<div class="mark"><button data-v="right">Right</button><button data-v="wrong">Wrong</button></div></div>`
+ +`<div class="ev" style="margin-top:6px">${tierChip(r)} <span class="score">${r.s.toFixed(3)}</span> · pincode ${esc(r.pin)} · ${esc(r.ev)} · family: ${r.fam}</div></div>`}).join('')||'<div class="empty">No pairs</div>';
+ document.getElementById('more').style.display=rows.length>shown?'':'none'}
+for(const id of ['q','ft','fr','ff'])document.getElementById(id).addEventListener('input',()=>{shown=60;renderPairs()});
+document.getElementById('more').onclick=()=>{shown+=60;renderPairs()};
+document.getElementById('list').addEventListener('click',e=>{const b=e.target.closest('button[data-v]');if(!b)return;const it=b.closest('.item'),k=it.dataset.k;
+ marks[k]=marks[k]===b.dataset.v?undefined:b.dataset.v;if(!marks[k])delete marks[k];try{localStorage.setItem(KEY,JSON.stringify(marks))}catch(e){}renderPairs()});
+document.getElementById('dl').onclick=()=>{const lines=['id_a,id_b,verdict',...Object.entries(marks).map(([k,v])=>k.replace('|',',')+','+v)];
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([lines.join('\n')],{type:'text/csv'}));a.download='neighbour_marks.csv';a.click()};
+renderPairs();
+// households
+(function(){const big=D.households.filter(g=>g.length>D.household_max).length;
+ document.getElementById('hnote').textContent=`${D.households.length.toLocaleString()} groups linked by strong address evidence (identical address, same house, or one address containing the other). Groups larger than ${D.household_max} are likely a building or institution, not one household (${big}).`;
+ document.getElementById('hlist').innerHTML=D.households.sort((a,b)=>b.length-a.length).map(g=>`<div class="item"><div class="sub">${g.length} people${g.length>D.household_max?' · probably a building or institution':''} · pincode ${esc(P[g[0]]?.pin)}</div>`
+ +g.map(i=>`<div style="margin-top:6px">${person(i)}</div>`).join('')+'</div>').join('')})();
+// duplicates
+const dups=D.pairs.filter(isDup);let dShown=60;
+function renderDups(){document.getElementById('dlist').innerHTML=dups.slice(0,dShown).map(r=>`<div class="item"><div class="row">${person(r.a)}${person(r.b)}<div>${tierChip(r)}</div></div></div>`).join('')||'<div class="empty">None</div>';
+ document.getElementById('dmore').style.display=dups.length>dShown?'':'none'}
+document.getElementById('dmore').onclick=()=>{dShown+=60;renderDups()};renderDups();
+</script></body></html>

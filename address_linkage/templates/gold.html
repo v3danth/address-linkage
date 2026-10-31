@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gold Set Labelling</title>
+<style>
+:root{--bg:#f7f7f5;--panel:#fff;--fg:#1d1d1b;--muted:#6b6b66;--line:#e3e2dd;--accent:#2f5d8a;--house:#1f6f43;--near:#2f5d8a;--far:#8a2343;--unk:#6b6b66;--focus:#f4d35e}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141518;--panel:#1c1d21;--fg:#e9e8e4;--muted:#9a998f;--line:#2e2f34;--accent:#8db4dd;
+--house:#66bb8a;--near:#8db4dd;--far:#f28ba8;--unk:#9a998f;--focus:#8a7a2a}}
+:root[data-theme="dark"]{--bg:#141518;--panel:#1c1d21;--fg:#e9e8e4;--muted:#9a998f;--line:#2e2f34;--accent:#8db4dd;--house:#66bb8a;--near:#8db4dd;--far:#f28ba8;--unk:#9a998f;--focus:#8a7a2a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
+header{position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--line);padding:12px 16px;z-index:2}
+.wrap{max-width:900px;margin:0 auto}h1{font-size:18px;margin:0}.sub{color:var(--muted);font-size:13px}
+.prog{height:6px;background:var(--line);border-radius:3px;margin-top:8px;overflow:hidden}.prog i{display:block;height:100%;background:var(--accent);width:0}
+.bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px}
+button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--panel);color:var(--fg);border-radius:8px;padding:6px 12px}
+main{padding:16px}.help{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:14px;margin-bottom:14px}
+.help b{white-space:nowrap}
+.person{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px}
+.me{border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:6px}
+.name{font-weight:600}.id{font-family:ui-monospace,Menlo,monospace;font-size:12.5px;color:var(--accent)}.ad{color:var(--muted);font-size:14px;overflow-wrap:anywhere}
+.cand{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px;border-radius:8px}
+.cand.f{outline:2px solid var(--focus)}
+.lab button{padding:5px 9px;margin-left:4px;font-size:13px}
+.cand[data-l="house"] button[data-l="house"]{background:var(--house);color:#fff;border-color:var(--house)}
+.cand[data-l="near"] button[data-l="near"]{background:var(--near);color:#fff;border-color:var(--near)}
+.cand[data-l="far"] button[data-l="far"]{background:var(--far);color:#fff;border-color:var(--far)}
+.cand[data-l="unknown"] button[data-l="unknown"]{background:var(--unk);color:#fff;border-color:var(--unk)}
+.done{color:var(--house);font-size:13px}
+@media (max-width:640px){.cand{grid-template-columns:1fr}.lab{display:flex;flex-wrap:wrap;gap:4px}.lab button{margin:0}}
+</style></head><body>
+<header><div class="wrap"><h1>Gold set: who lives near whom</h1>
+<div class="sub" id="stat"></div><div class="prog"><i id="pg"></i></div>
+<div class="bar"><button id="next">Next unlabelled</button><button id="dl">Download labels (CSV)</button>
+<span class="sub">Keys: 1 same house · 2 neighbour · 3 not near · 4 can't tell · arrow keys move</span></div></div></header>
+<main class="wrap">
+<div class="help"><b>Same house</b>: the same home, i.e. same house, flat or building number on the same street (family or flatmates).
+<b>Neighbour</b>: a different home but close: same street or lane, same building or complex, or the same small colony or village.
+<b>Not near</b>: a different area. <b>Can't tell</b>: an address too vague to decide.<br>
+Judge only from the addresses. Every candidate needs a label; the list may contain nobody near. Local file with personal data: do not share.</div>
+<div id="list"></div></main>
+<script id="data" type="application/json">__DATA__</script>
+<script>
+const D=JSON.parse(document.getElementById('data').textContent);const KEY='gold-labels-v1';
+let L={};try{L=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){}
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const LBL=[['house','1 Same house'],['near','2 Neighbour'],['far','3 Not near'],['unknown','4 Can\'t tell']];
+document.getElementById('list').innerHTML=D.map((x,i)=>`<div class="person" id="p${i}"><div class="me"><span class="sub">Person ${i+1} of ${D.length} · pincode ${esc(x.pin)}</span>
+<div><span class="name">${esc(x.n)}</span> <span class="id">${esc(x.p)}</span></div><div class="ad">${esc(x.a)}</div></div>`
++x.c.map(c=>`<div class="cand" tabindex="0" data-k="${esc(x.p)}|${esc(c.id)}"><div><span class="name">${esc(c.n)}</span> <span class="id">${esc(c.id)}</span><div class="ad">${esc(c.a)}</div></div>
+<div class="lab">${LBL.map(([v,t])=>`<button data-l="${v}">${t}</button>`).join('')}</div></div>`).join('')+`<div class="done" id="d${i}"></div></div>`).join('');
+const cands=[...document.querySelectorAll('.cand')];let cur=0;
+function paint(){let n=0;for(const c of cands){const v=L[c.dataset.k];if(v){c.dataset.l=v;n++}else delete c.dataset.l}
+ D.forEach((x,i)=>{const all=x.c.every(c=>L[x.p+'|'+c.id]);document.getElementById('d'+i).textContent=all?'complete':''});
+ const people=D.filter(x=>x.c.every(c=>L[x.p+'|'+c.id])).length;
+ document.getElementById('stat').textContent=`${n} of ${cands.length} candidates labelled · ${people} of ${D.length} people complete`;
+ document.getElementById('pg').style.width=(100*n/cands.length)+'%'}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(L))}catch(e){}}
+function focus(i){cur=Math.max(0,Math.min(cands.length-1,i));for(const c of cands)c.classList.remove('f');cands[cur].classList.add('f');cands[cur].scrollIntoView?.({block:'center'})}
+function set(c,v){L[c.dataset.k]=v;save();paint()}
+document.getElementById('list').addEventListener('click',e=>{const b=e.target.closest('button[data-l]');if(!b)return;const c=b.closest('.cand');cur=cands.indexOf(c);set(c,b.dataset.l)});
+document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;const m={'1':'house','2':'near','3':'far','4':'unknown'}[e.key];
+ if(m){set(cands[cur],m);focus(cur+1);e.preventDefault()}else if(e.key==='ArrowDown'){focus(cur+1);e.preventDefault()}else if(e.key==='ArrowUp'){focus(cur-1);e.preventDefault()}});
+document.getElementById('next').onclick=()=>{const i=cands.findIndex(c=>!L[c.dataset.k]);if(i>=0)focus(i)};
+document.getElementById('dl').onclick=()=>{const rows=['person,candidate,label',...Object.entries(L).map(([k,v])=>k.replace('|',',')+','+v)];
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([rows.join('\n')],{type:'text/csv'}));a.download='gold_labels.csv';a.click()};
+paint();focus(Math.max(0,cands.findIndex(c=>!L[c.dataset.k])));
+</script></body></html>

@@ -1,0 +1,18 @@
+[project]
+name = "address-linkage"
+version = "0.1.0"
+description = "Link people by where they live, with the Amazon ML Challenge entity-resolution pipeline"
+requires-python = ">=3.9"
+
+[tool.ruff]
+line-length = 140
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+
+[tool.ruff.lint.isort]
+force-single-line = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -1,0 +1,16 @@
+# Every output lives in work/ and contains names and home addresses: never commit it.
+work/
+*.parquet
+*.tsv
+gold_labels*.csv
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# OS
+.DS_Store
