@@ -14,3 +14,22 @@ venv/
 
 # OS
 .DS_Store
+
+# Model weights, embeddings and checkpoints
+*.safetensors
+*.pt
+*.pth
+*.ckpt
+*.bin
+*.onnx
+*.h5
+*.pkl
+*.pickle
+*.joblib
+*.npy
+*.npz
+*.faiss
+*.nnue
+models/
+encoder/
+emb/

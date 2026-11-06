@@ -1,12 +1,12 @@
-# Pipeline (ml-challenge) and this package
 polars==1.33.1
-rapidfuzz>=3.13
+rapidfuzz==3.14.1
 anyascii==0.3.3
-numpy>=1.26
-lightgbm>=4.0
-torch>=2.1
-transformers>=4.40
-pymysql>=1.1
+numpy==2.0.2
+lightgbm==4.6.0
+torch==2.4.0
+transformers==4.46.0
+pymysql==1.1.2
+
 # Development
-pytest>=8
-ruff>=0.6
+pytest==8.4.2
+ruff==0.7.1
